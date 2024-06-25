@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake JS</title>
+    <meta http-equiv="Permissions-Policy" content="microphone=(self 'https://localhost:9999')">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+</head>
+<body style="margin: 0;">
+    <div id="wrapper">
+        <div class="info">
+            <ul>
+                <button onclick="init()">Empezar reconocimiento</button>
+                <div id="result">Esperando comandos...</div>
+                <li>Score: <span id="score">0</span></li>
+                <li>Best Score: <span id="best-score">0</span></li>
+                <li>Difficulty: <span id="difficulty">Easy</span> <button id="changeDif">Change</button></li>
+            </ul>
+        </div>
+        <canvas style="display: block;" id="canvas">Your browser is not supported canvas</canvas>
+        <script>
+            let recognizer;
+
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'micPermission' && event.data.granted) {
+                    console.log('Permiso de micrófono recibido en iframe');
+                    init();  // You can call your initialization function here if needed
+                }
+            });
+
+            async function init() {
+                // Crear un reconocedor de comandos de voz
+                const URL = 'https://localhost:9999/static/modelo_pre/';
+                recognizer = speechCommands.create(
+                    'BROWSER_FFT',
+                    null,
+                    URL + 'model.json',
+                    URL + 'metadata.json'
+                );
+
+                // Asegúrate de que el modelo está cargado
+                await recognizer.ensureModelLoaded();
+                console.log('Modelo cargado correctamente');
+                console.log('Iniciando reconocimiento');
+                recognizeCommands();
+            }
+
+            function recognizeCommands() {
+                recognizer.listen(result => {
+                    const words = recognizer.wordLabels();
+                    const scores = result.scores;
+                    const highestScoreIndex = scores.indexOf(Math.max(...scores));
+                    const command = words[highestScoreIndex];
+
+                    document.getElementById('result').innerText = ` ${command}`;
+                    handleVoiceCommand(command);
+                }, {
+                    probabilityThreshold: 0.80,
+                    overlapFactor: 0.50, // Reduce el solapamiento entre ventanas de reconocimiento
+                    includeSpectrogram: true, // Incluir espectrogramas para análisis más detallado
+                    invokeCallbackOnNoiseAndUnknown: true // Invoca la función de callback incluso cuando se detecta ruido o comandos desconocidos
+                });
+            }
+        </script>
+    </div>
+    <script src="https://localhost:9999/static/snake.js/js/game.js"></script>
+</body>
+</html>
