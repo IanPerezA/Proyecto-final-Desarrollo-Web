@@ -1,0 +1,1 @@
+docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=12345678 -e MYSQL_DATABASE=proyecto_web -e MYSQL_USER=root -e MYSQL_PASSWORD=12345678 -p 3308:3308 -d mysql:8.0.12 --default-authentication-plugin=mysql_native_password

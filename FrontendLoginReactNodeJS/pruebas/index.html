@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Command Recognition</title>
+    <meta http-equiv="Permissions-Policy" content="microphone=(self)">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+</head>
+<body>
+    <h1>Voice Command Recognition</h1>
+    <button onclick="init()">Start Recognition</button>
+    <div id="result"></div>
+
+    <script>
+        let recognizer;
+
+        async function init() {        }
+
+        function recognizeCommands() {
+            recognizer.listen(result => {
+                const words = recognizer.wordLabels();
+                const scores = result.scores;
+                const highestScoreIndex = scores.indexOf(Math.max(...scores));
+                const command = words[highestScoreIndex];
+
+                document.getElementById('result').innerText = `Comando reconocido: ${command}`;
+            }, {
+                probabilityThreshold: 0.80,
+                overlapFactor: 0.50, // Reduce el solapamiento entre ventanas de reconocimiento
+                includeSpectrogram: true, // Incluir espectrogramas para análisis más detallado
+                invokeCallbackOnNoiseAndUnknown: true // Invoca la función de callback incluso cuando se detecta ruido o comandos desconocidos
+            });
+        }
+    </script>
+</body>
+</html>
